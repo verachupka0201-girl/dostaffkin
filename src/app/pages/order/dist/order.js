@@ -13,8 +13,9 @@ var order_config_1 = require("./order.config");
 var forms_1 = require("@angular/forms");
 var common_1 = require("@angular/common");
 var Order = /** @class */ (function () {
-    function Order(formBuilder) {
+    function Order(formBuilder, deliveryApi) {
         this.formBuilder = formBuilder;
+        this.deliveryApi = deliveryApi;
         this.sizes = order_config_1.DELIVERY_SIZES;
         this.speeds = order_config_1.DELIVERY_SPEEDS;
         this.orderId = core_1.signal(null);
@@ -103,6 +104,7 @@ var Order = /** @class */ (function () {
         alert('Не удалось построить маршрут. Проверьте адреса и выбранные параметры.');
     };
     Order.prototype.submitOrder = function () {
+        var _this = this;
         var calculation = this.calculationResult();
         if (!calculation) {
             alert('Сначала рассчитайте стоимость, чтобы оформить заявку');
@@ -121,8 +123,13 @@ var Order = /** @class */ (function () {
             calculation: calculation,
             createdAt: new Date().toISOString()
         };
-        console.log(payload);
-        this.orderId.set(1);
+        this.deliveryApi.createDelivery(payload).subscribe(function (response) {
+            if ('error' in response) {
+                alert(response.error);
+                return;
+            }
+            _this.orderId.set(response.id);
+        });
     };
     Order = __decorate([
         core_1.Component({

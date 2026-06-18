@@ -11,11 +11,13 @@ var core_1 = require("@angular/core");
 var header_1 = require("../../header/header");
 var forms_1 = require("@angular/forms");
 var Track = /** @class */ (function () {
-    function Track() {
+    function Track(deliveryApi) {
+        this.deliveryApi = deliveryApi;
         this.trackNumber = '';
         this.trackResult = core_1.signal(null);
     }
     Track.prototype.trackShipment = function () {
+        var _this = this;
         var rawValue = this.trackNumber.trim();
         if (!rawValue) {
             alert('Заполните номер отправления');
@@ -27,20 +29,12 @@ var Track = /** @class */ (function () {
             alert('Введите корректный номер отправления');
             return;
         }
-        this.trackResult.set({
-            id: 1,
-            route: {
-                from: 'Москва, улица Арбат, 1',
-                to: 'Минск, проспект Независимости, 58'
-            },
-            statuses: [
-                { type: 'created', label: 'Создан', date: '10.01.2026' },
-                { type: 'in-way', label: 'В пути: Вязьма', date: '15.01.2026' },
-                { type: 'in-way', label: 'В пути: Орша', date: '16.01.2026' },
-                { type: 'in-way', label: 'В пути: Минск', date: '18.01.2026' },
-                { type: 'ready', label: 'Готов к выдаче', date: '25.01.2026' },
-                { type: 'done', label: 'Вручен', date: '27.01.2026' }
-            ]
+        this.deliveryApi.getDeliveryInfo(numericValue).subscribe(function (response) {
+            if ('error' in response) {
+                alert(response.error);
+                return;
+            }
+            _this.trackResult.set(response);
         });
     };
     Track = __decorate([
